@@ -3,7 +3,7 @@ const { createOrganization, renderCreateOrganization } = require('../../controll
 const { isAuthenticated } = require('../../middleware/isAuthenticated')
 const router = express.Router()
 
-router.route('/create').get().post(isAuthenticated,createOrganization)
+router.route('/create').get().post(isAuthenticated,)
 
 
 module.exports = router
