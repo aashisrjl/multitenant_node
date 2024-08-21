@@ -70,4 +70,21 @@ exports.createPayment = async(req,res)=>{
     })
 
 }
+exports.getCurrentOrgDetail = async(req,res)=>{
+    const currentOrganization = req.organizationNumber
+    const data = await sequelize.query(`SELECT * FROM organization_${currentOrganization}
+         JOIN users ON organization_${currentOrganization}.userId = users.id`,{
+            types: QueryTypes.SELECT
+    })
+    if(!data){
+        return res.status(400).json({
+            message:"no organization found"
+        })
+    }
+    res.status(200).json({
+        message : "organization details fetched successfully",
+        data : data
+    })
+}
+
 

@@ -57,7 +57,9 @@ exports.loginUser = async (req,res)=>{
         type: QueryTypes.CREATE
     })
 
-      res.send("Logged in")
+      res.status(200).json({
+        message: "Logged in"
+    })
        }else{
       res.send("Invalid password or email")
        }
@@ -65,5 +67,32 @@ exports.loginUser = async (req,res)=>{
     }
     // exist xaina vaney - > [],xa vaney [{name:"",password:"",email:"",id:""}]
 
+}
+exports.deleteUser = async (req,res)=>{
+    const userId = req.userId;
+    await sequelize.query(`DELETE FROM users WHERE id=?`,{
+        type: QueryTypes.DELETE,
+        replacements:[userId]
+    })
+    const org = await sequelize.query(`SELECT organizationNumber FROM userhistory_${userId}`,{
+        type: QueryTypes.SELECT
+    })
+    // const num = await sequelize.query(`SELECT organizationNumber from `)
+   
+    for(var i=0;i<org.length;i++){
+    await sequelize.query(`DROP TABLE organization_${org[i].organizationNumber}`,{
+        types: QueryTypes.DROP
+    })
+    await sequelize.query(`DROP TABLE userhistory_${userId}`,{
+        types: QueryTypes.DROP
+    })
+    await sequelize.query(`DROP TABLE payment_${org[i].organizationNumber}`,{
+        types: QueryTypes.DROP
+    })
+
+    }
+    res.status(200).json({
+        message: "deleted successfully"
+    })
 }
 
