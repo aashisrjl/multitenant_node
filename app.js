@@ -17,8 +17,8 @@ const { users } = require('./model/index')
 app.use('', organizationRoute)
 app.use('', userRoute)
 
-app.get('/', (req, res) => {
-    res.send('Hello World!')
+app.get('/chat', (req, res) => {
+    res.render('chat')
 })
 app.get('/home',(req,res)=>{
     res.render('home')
@@ -29,28 +29,38 @@ const server = app.listen(port, () => {
 })
 const io = new Server(server)
 io.on('connection',(socket)=>{
-    console.log('a new client connected'+socket.id)
-    // socket.on("hello",(data)=>{
-    //     console.log(data)
-    //     socket.emit('response',"success")// notification for specific user
-    // })
-    // io.emit('response',"success")// notification for all user
-
-    socket.on('register',async(data)=>{
-       const {username,password,email} = data
-       const user = await users.create({
-        username,
-        password,
-        email
-       })
-       socket.emit('response',{
-        status:200,
-        message:"user created successfully"
-       });
+    socket.on('message',(msg)=>{
+        console.log(msg)
+        io.emit('broadcast',msg);
     })
-  
+
     socket.on('disconnect',()=>{
-        console.log('a client disconnected')
+        console.log('user disconnected')
     })
 })
+// io.on('connection',(socket)=>{
+//     console.log('a new client connected'+socket.id)
+//     // socket.on("hello",(data)=>{
+//     //     console.log(data)
+//     //     socket.emit('response',"success")// notification for specific user
+//     // })
+//     // io.emit('response',"success")// notification for all user
+
+//     socket.on('register',async(data)=>{
+//        const {username,password,email} = data
+//        const user = await users.create({
+//         username,
+//         password,
+//         email
+//        })
+//        socket.emit('response',{
+//         status:200,
+//         message:"user created successfully"
+//        });
+//     })
+  
+//     socket.on('disconnect',()=>{
+//         console.log('a client disconnected')
+//     })
+// })
 
