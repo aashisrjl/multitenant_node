@@ -11,17 +11,33 @@ app.use(require('cookie-parser')())
 const {Server} = require('socket.io');
 const organizationRoute = require('./route/organization/organizationRoute')
 const userRoute = require('./route/user/userRoute')
-const { users } = require('./model/index')
+const { users, sequelize } = require('./model/index')
+const { QueryTypes } = require('sequelize')
 
 // Use a base path for the organization and user routes
 app.use('', organizationRoute)
 app.use('', userRoute)
 
-app.get('/chat', (req, res) => {
-    res.render('chat')
+app.get('/chat/:id', async(req, res) => {
+    await sequelize.query(`CREATE TABLE IF NOT EXISTS chats(
+        id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+        senderId INT REFERENCES users(id),
+        receiverId INT REFERENCES users(id),
+        message TEXT
+        ) `,{
+            type: QueryTypes.CREATE
+        })
+        const msgg = await sequelize.query(`SELECT message from chats`,{
+            type: QueryTypes.SELECT
+        })
+    res.render('chat',{msgg})
 })
 app.get('/home',(req,res)=>{
     res.render('home')
+})
+app.get('/users',async(req,res)=>{
+    const userList = await users.findAll();
+    res.render('users',{userList})
 })
 
 const server = app.listen(port, () => {
@@ -31,7 +47,11 @@ const io = new Server(server)
 io.on('connection',(socket)=>{
     socket.on('message',(msg)=>{
         console.log(msg)
-        io.emit('broadcast',msg);
+        sequelize.query(`INSERT INTO CHATS (senderId,receiverId,message) VALUES(?,?,?)`,{
+            types: QueryTypes.INSERT,
+            replacements: [msg.senderId,msg.receiverId,msg.message]
+        })
+        io.emit('broadcast',msg.message);
     })
 
     socket.on('disconnect',()=>{

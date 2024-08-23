@@ -31,6 +31,8 @@
       padding: 10px;
       overflow-y: scroll;
       max-height: 300px;
+      display: flex;
+      flex-direction: column;
     }
     
     .message {
@@ -67,6 +69,14 @@
       margin-left: 10px;
       cursor: pointer;
     }
+    .msg{
+      background-color: blue;
+      padding: 15px;
+      border-radius: 15px;
+      margin: 10px;
+      max-width: 200px;
+      overflow: hidden;
+    }
   </style>
 </head>
 <body>
@@ -75,6 +85,10 @@
       Chat
     </div>
     <div id="chat-messages">
+      <% msgg.forEach((msg)=>{ %>
+        <h4 class="msg"><%- msg.message %></h4>
+
+     <% }) %>
         
       <!-- Messages will be displayed here -->
     </div>
@@ -94,12 +108,18 @@
     form.addEventListener("submit",(e)=>{
         e.preventDefault();
         if(message.value){
-            socket.emit('message',message.value);
+          const data = {
+            message: message.value,
+            senderId: 1,
+            receiverId:2
+          }
+            socket.emit('message',data);
             
         }
     })
     socket.on('broadcast',(msg)=>{
-              const h2 = document.createElement('h3');
+              const h2 = document.createElement('h4');
+              h2.classList.add("msg");
               h2.textContent = msg;
               chatMessages.appendChild(h2);
             })
